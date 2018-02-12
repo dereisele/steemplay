@@ -48,16 +48,16 @@ class MyWindow(Gtk.Window):
     def addWidgets(self):
         hbox = Gtk.Box()
 
-        hb = Gtk.HeaderBar()
-        hb.set_show_close_button(True)
-        hb.props.title = "Steemplay"
-        self.set_titlebar(hb)
+        self.hb = Gtk.HeaderBar()
+        self.hb.set_show_close_button(True)
+        self.hb.props.title = "Steemplay"
+        self.set_titlebar(self.hb)
 
         button = Gtk.Button()
         icon = Gio.ThemedIcon(name="mail-send-receive-symbolic")
         image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         button.add(image)
-        hb.pack_end(button)
+        self.hb.pack_start(button)
 
         button.connect("clicked", self.on_button_clicked)
 
@@ -114,8 +114,12 @@ class MyWindow(Gtk.Window):
 
     def update_webview(self, id):
         content = self.feed[id]["comment"]["body"]
+        title = self.feed[id]["comment"]["title"]
+        author = self.feed[id]["comment"]["author"]
         html = markdown.markdown(text=content, output_format="html5")
         self.content_webview.load_html(html, "")
+        self.hb.set_title(title)
+        self.hb.set_subtitle(author)
 
 
 if __name__ == "__main__":
