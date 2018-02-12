@@ -4,6 +4,9 @@ gi.require_version('WebKit2', '4.0')
 from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository import WebKit2
+from os.path import join
+from os.path import abspath
+from os.path import dirname
 
 import markdown
 from steem.steemd import Steemd
@@ -12,6 +15,8 @@ from steem.steemd import Steemd
 steemd_nodes = [
     'https://gtg.steem.house:8090',
 ]
+
+HERE = abspath(dirname(__file__))
 
 def big(text):
     return "<big>" + text + "</big>"
@@ -39,65 +44,43 @@ class ListBoxRowItem(Gtk.ListBoxRow):
 
         self.add(box)
 
-class MyWindow(Gtk.Window):
+class Steemplay(object):
 
     def __init__(self):
-        Gtk.Window.__init__(self, title="Steemplay")
-        self.addWidgets()
+        self.setupGUI()
         self.setupSteem()
         self.oldest_entry = 0
         self.feed = []
 
-    def addWidgets(self):
+    def setupGUI(self):
+        self.builder = Gtk.Builder()
+        self.builder.add_from_file(join(HERE, "steemplay.ui"))
+        self.builder.connect_signals(self)
 
-        paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        get_obj = self.builder.get_object
+        self.window = get_obj("window")
+        self.window.connect('delete-event', Gtk.main_quit)
 
-        ## HEADER BAR
-        self.hb = Gtk.HeaderBar()
-        self.hb.set_show_close_button(True)
-        self.hb.props.title = "Steemplay"
-        self.set_titlebar(self.hb)
-
-        button = Gtk.Button()
-        icon = Gio.ThemedIcon(name="mail-send-receive-symbolic")
-        image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        button.add(image)
-        self.hb.pack_start(button)
-
-        button.connect("clicked", self.on_button_clicked)
-
-        ## LIST WINDOW
-        self.listbox = Gtk.ListBox()
-        self.listbox.connect("row_activated", self.on_row_activated)
-
-        list_window = Gtk.ScrolledWindow()
-        #list_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        list_window.add(self.listbox)
-
-        ## CONTENT WINDOW
         self.content_webview = WebKit2.WebView()
+        content_scrolled = get_obj("content_scrolled")
+        content_scrolled.add_with_viewport(self.content_webview)
 
-        content_window = Gtk.ScrolledWindow()
-        content_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        content_window.add(self.content_webview)
+        self.window.show_all()
 
-        ## MAIN BOX
-        paned.pack1(list_window, True, False)
-        paned.pack2(content_window, True, False)
-        paned.set_position(100)
-
-        self.add(paned)
+        self.listbox = get_obj("listbox")
+        self.hb = get_obj("headerbar")
 
     def setupSteem(self):
         self.std = Steemd(nodes=steemd_nodes)
 
-    def on_button_clicked(self, widget):
+    def onButtonPressed(self, widget):
+        print("Btn pressed")
         self.update_new()
 
-    def on_row_activated(self, listbox, listboxrow):
+    def onRowSelected(self, listbox, listboxrow):
         i = listboxrow.get_index()
         print(i)
-        self.update_webview(i)
+        self.update_content(i)
 
     def update_new(self):
         new_feed = self.std.get_feed("dereisele", self.oldest_entry, 6)
@@ -120,7 +103,7 @@ class MyWindow(Gtk.Window):
 
         self.listbox.show_all()
 
-    def update_webview(self, id):
+    def update_content(self, id):
         content = self.feed[id]["comment"]["body"]
         title = self.feed[id]["comment"]["title"]
         author = self.feed[id]["comment"]["author"]
@@ -131,7 +114,5 @@ class MyWindow(Gtk.Window):
 
 
 if __name__ == "__main__":
-    win = MyWindow()
-    win.connect("delete-event", Gtk.main_quit)
-    win.show_all()
+    win = Steemplay()
     Gtk.main()
