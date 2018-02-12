@@ -29,10 +29,13 @@ class ListBoxRowItem(Gtk.ListBoxRow):
         label_title.set_markup(big(title))
         label_title.set_line_wrap(True)
 
+        separ = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
 
         box.pack_start(label_author, True, True, 0)
         box.pack_start(label_title, True, True, 0)
+        box.pack_end(separ, False, False, 0)
 
         self.add(box)
 
@@ -46,8 +49,10 @@ class MyWindow(Gtk.Window):
         self.feed = []
 
     def addWidgets(self):
-        hbox = Gtk.Box()
 
+        paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+
+        ## HEADER BAR
         self.hb = Gtk.HeaderBar()
         self.hb.set_show_close_button(True)
         self.hb.props.title = "Steemplay"
@@ -61,24 +66,27 @@ class MyWindow(Gtk.Window):
 
         button.connect("clicked", self.on_button_clicked)
 
+        ## LIST WINDOW
         self.listbox = Gtk.ListBox()
         self.listbox.connect("row_activated", self.on_row_activated)
 
+        list_window = Gtk.ScrolledWindow()
+        #list_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        list_window.add(self.listbox)
+
+        ## CONTENT WINDOW
         self.content_webview = WebKit2.WebView()
 
-        scrolled_window = Gtk.ScrolledWindow()
-        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        scrolled_window.add(self.content_webview)
+        content_window = Gtk.ScrolledWindow()
+        content_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        content_window.add(self.content_webview)
 
-        scrolled_window1 = Gtk.ScrolledWindow()
-        scrolled_window1.set_min_content_width(350)
-        #scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        scrolled_window1.add(self.listbox)
+        ## MAIN BOX
+        paned.pack1(list_window, True, False)
+        paned.pack2(content_window, True, False)
+        paned.set_position(100)
 
-        hbox.pack_start(scrolled_window1, False, True, 0)
-        hbox.pack_start(scrolled_window, True, True, 0)
-
-        self.add(hbox)
+        self.add(paned)
 
     def setupSteem(self):
         self.std = Steemd(nodes=steemd_nodes)
