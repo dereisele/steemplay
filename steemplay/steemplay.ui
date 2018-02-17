@@ -38,6 +38,19 @@
             <property name="visible">True</property>
             <property name="show_close_button">True</property>
             <property name="title">Steemplay</property>
+            <child>
+              <object class="GtkToggleButton" id="btn_vote">
+                <property name="visible">True</property>
+                <property name="always-show-image">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="image">vote_image</property>
+                <property name="label">0</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="resize">False</property>
@@ -100,6 +113,11 @@
   <object class="GtkImage" id="reload_image">
     <property name="visible">True</property>
     <property name="icon_name">emblem-synchronizing-symbolic</property>
+  </object>
+
+  <object class="GtkImage" id="vote_image">
+    <property name="visible">True</property>
+    <property name="icon_name">go-up-symbolic</property>
   </object>
 
 </interface>

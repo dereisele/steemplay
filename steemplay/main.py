@@ -20,6 +20,8 @@ steemd_nodes = [
     "https://rpc.steemliberator.com",
 ]
 
+std = Steemd(nodes=steemd_nodes)
+
 HERE = abspath(dirname(__file__))
 
 def big(text):
@@ -52,7 +54,6 @@ class Steemplay(object):
 
     def __init__(self):
         self.setupGUI()
-        self.setupSteem()
         self.oldest_entry = 0
         self.feed = []
 
@@ -74,11 +75,9 @@ class Steemplay(object):
         self.listbox = get_obj("listbox")
         self.hb = get_obj("headerbar")
 
-    def setupSteem(self):
-        self.std = Steemd(nodes=steemd_nodes)
+        self.btn_vote = get_obj("btn_vote")
 
     def onButtonPressed(self, widget):
-        print("Btn pressed")
         self.update_new()
 
     def onRowSelected(self, listbox, listboxrow):
@@ -87,7 +86,7 @@ class Steemplay(object):
         self.update_content(i)
 
     def update_new(self):
-        new_feed = self.std.get_feed("dereisele", self.oldest_entry, 6)
+        new_feed = std.get_feed("dereisele", self.oldest_entry, 6)
 
         if new_feed == None:
             print("Feed is None")
@@ -111,10 +110,12 @@ class Steemplay(object):
         content = self.feed[id]["comment"]["body"]
         title = self.feed[id]["comment"]["title"]
         author = self.feed[id]["comment"]["author"]
+        votes = self.feed[id]["comment"]["net_votes"]
         html = markdown.markdown(text=content, output_format="html5")
         self.content_webview.load_html(html, "")
         self.hb.set_title(title)
         self.hb.set_subtitle(author)
+        self.btn_vote.set_label(str(votes))
 
 
 if __name__ == "__main__":
