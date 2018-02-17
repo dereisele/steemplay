@@ -13,7 +13,11 @@ from steem.steemd import Steemd
 
 
 steemd_nodes = [
-    'https://gtg.steem.house:8090',
+    "https://api.steemit.com",
+    "https://gtg.steem.house:8090",
+    "https://steemd.minnowsupportproject.org",
+    "https://steemd.privex.io",
+    "https://rpc.steemliberator.com",
 ]
 
 HERE = abspath(dirname(__file__))
